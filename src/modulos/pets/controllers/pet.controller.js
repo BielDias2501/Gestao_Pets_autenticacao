@@ -1,31 +1,32 @@
 const Pet = require("../models/pet.model");
 
 class PetController {
-  // Cadastrar novo pet
   static async cadastrar(req, res) {
     try {
-      const { nome_pet, especie, raca, idade, dono_nome, historico_clinico } = req.body;
-
-      if (!nome_pet || !especie || !raca || idade == null || !dono_nome) {
+      const { nome_pet, especie, raca, idade, dono_nome, senha, historico_clinico } = req.body;
+  
+      if (!nome_pet || !especie || !raca || idade == null || !dono_nome || !senha) {
         return res
           .status(400)
           .json({ msg: "Todos os campos obrigatórios devem ser preenchidos!" });
       }
-
+  
       const novoPet = await Pet.create({
         nome_pet,
         especie,
         raca,
         idade,
         dono_nome,
-        historico_clinico: historico_clinico || [] // caso não venha, usa array vazio
+        senha,
+        historico_clinico: historico_clinico || []
       });
-
+  
       res.status(200).json({ msg: "Pet cadastrado com sucesso", pet: novoPet });
     } catch (error) {
       res.status(500).json({ msg: "Erro ao cadastrar pet", erro: error.message });
     }
   }
+  
 
   // Buscar todos os pets
   static async listarTodos(req, res) {

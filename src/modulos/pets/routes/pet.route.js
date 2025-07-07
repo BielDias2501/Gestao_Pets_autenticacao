@@ -1,28 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const PetController = require("../controllers/pet.controller");
-const autenticar = require("../middleware/pets.middleware");
+const AutenticacaoMiddleware = require("../middleware/pets.middleware");
 
-// Todas as rotas abaixo exigem autenticação
-router.use(autenticar);
+// Listar todos os pets
+router.get("/", AutenticacaoMiddleware.autenticarToken, PetController.listarTodos);
 
-// GET /pets - Lista todos os pets
-router.get("/", PetController.listarTodos);
+// Buscar pet por ID
+router.get("/:id", AutenticacaoMiddleware.autenticarToken, PetController.buscarPorId);
 
-// GET /pets/:id - Busca um pet específico pelo ID
-router.get("/:id", PetController.buscarPorId);
-
-// POST /pets - Cadastra um novo pet
+// Cadastrar novo pet
 router.post("/", PetController.cadastrar);
 
-// PUT /pets/:id - Atualiza um pet existente
-router.put("/:id", PetController.atualizar);
+// Atualizar dados do pet
+router.put("/:id", AutenticacaoMiddleware.autenticarToken, PetController.atualizar);
 
-// DELETE /pets/:id - Remove um pet
-router.delete("/:id", PetController.deletar);
+// Deletar pet
+router.delete("/:id", AutenticacaoMiddleware.autenticarToken, PetController.deletar);
 
-// (opcional extra)
-// POST /pets/:id/consulta - Adiciona uma nova consulta ao histórico clínico
-router.post("/:id/consulta", PetController.adicionarConsulta);
+// Adicionar nova consulta ao histórico
+router.post("/:id/consulta", AutenticacaoMiddleware.autenticarToken, PetController.adicionarConsulta);
 
 module.exports = router;

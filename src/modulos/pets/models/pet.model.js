@@ -1,8 +1,9 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../../../config/configDB");
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../../config/configDB');
+const bcrypt = require('bcryptjs');
 
 const Pet = sequelize.define(
-  "Pet",
+  'Pet',
   {
     nome_pet: {
       type: DataTypes.STRING,
@@ -22,7 +23,7 @@ const Pet = sequelize.define(
       validate: {
         min: {
           args: [0],
-          msg: "A idade deve ser um número positivo.",
+          msg: 'A idade deve ser um número positivo.',
         },
       },
     },
@@ -30,16 +31,42 @@ const Pet = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    senha: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: {
+          args: [6],
+          msg: 'A senha deve ter no mínimo 6 caracteres.',
+        },
+      },
+    },
     historico_clinico: {
       type: DataTypes.JSON,
       allowNull: true,
-      defaultValue: [], // array de objetos representando consultas
+      defaultValue: [],
     },
   },
   {
-    tableName: "pet",
-    createdAt: "criado_em",
-    updatedAt: "atualizado_em",
+    tableName: 'pets',
+    createdAt: 'criado_em',
+    updatedAt: 'atualizado_em',
+
+    hooks: {
+      // criptografa a senha antes de criar o registro
+      beforeCreate: async (pet) => {
+        const salt = await bcrypt.genSalt(10);
+        pet.senha = await bcrypt.hash(pet.senha, salt);
+      },
+
+      // também criptografa caso atualize a senha
+      beforeUpdate: async (pet) => {
+        if (pet.changed('senha')) {
+          const salt = await bcrypt.genSalt(10);
+          pet.senha = await bcrypt.hash(pet.senha, salt);
+        }
+      },
+    },
   }
 );
 
